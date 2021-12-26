@@ -1,11 +1,29 @@
-import { Query, Resolver } from "type-graphql";
+import { Arg, Mutation, Query, Resolver } from "type-graphql";
+import { User } from "../../database/entities/User";
 
 @Resolver()
 export class UsersResolver {
-  private users = ["a", "b", "c"];
+  @Query(() => [User])
+  async getUsers(): Promise<User[]> {
+    return User.find();
+  }
 
-  @Query(() => [String])
-  async getUsers() {
-    return this.users;
+  @Mutation(() => User)
+  async createUser(
+    @Arg("firstname") firstname: string,
+    @Arg("lastname") lastname: string,
+    @Arg("email") email: string,
+    @Arg("password") password: string
+  ): Promise<User> {
+    const user = Object.assign(new User(), {
+      firstname,
+      lastname,
+      email,
+      password,
+    });
+
+    await User.save(user);
+
+    return user;
   }
 }
